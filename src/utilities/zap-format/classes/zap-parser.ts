@@ -94,12 +94,14 @@ export default class ZapParser {
 
 			if (this.isAtEnd()) break;
 
-			if (this.check(TokenType.COMMENT)) items[itemsSize++] = this.parseComment();
-			else if (this.check(TokenType.OPT)) options[optionsSize++] = this.parseOption();
-			else if (this.check(TokenType.TYPE)) items[itemsSize++] = this.parseTypeDefinition();
-			else if (this.check(TokenType.EVENT)) items[itemsSize++] = this.parseEvent();
-			else if (this.check(TokenType.FUNCT)) items[itemsSize++] = this.parseFunction();
-			else if (this.check(TokenType.NAMESPACE)) items[itemsSize++] = this.parseNamespace();
+			const tokenType = this.peek().type;
+
+			if (tokenType === TokenType.COMMENT) items[itemsSize++] = this.parseComment();
+			else if (tokenType === TokenType.OPT) options[optionsSize++] = this.parseOption();
+			else if (tokenType === TokenType.TYPE) items[itemsSize++] = this.parseTypeDefinition();
+			else if (tokenType === TokenType.EVENT) items[itemsSize++] = this.parseEvent();
+			else if (tokenType === TokenType.FUNCT) items[itemsSize++] = this.parseFunction();
+			else if (tokenType === TokenType.NAMESPACE) items[itemsSize++] = this.parseNamespace();
 			else throw new Error(`Unexpected token ${this.peek().type} at line ${this.peek().line}`);
 
 			this.skipNewlines();
@@ -657,7 +659,7 @@ export default class ZapParser {
 	}
 
 	private parseVectorType(): VectorTypeNode {
-		const _vectorToken = this.advance();
+		this.advance();
 		let components: Array<TypeNode> | undefined;
 
 		if (this.check(TokenType.LEFT_PAREN)) {

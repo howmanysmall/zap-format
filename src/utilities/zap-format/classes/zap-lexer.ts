@@ -63,14 +63,28 @@ const keywords = new Map<string, TokenType>([
 	["yield", TokenType.IDENTIFIER],
 ]);
 
-function isAlpha(character: string): boolean {
-	return (character >= "a" && character <= "z") || (character >= "A" && character <= "Z") || character === "_";
+const BYTE_LOWER_A = 97;
+const BYTE_LOWER_Z = 122;
+const BYTE_UPPER_A = 65;
+const BYTE_UPPER_Z = 90;
+const BYTE_UNDERSCORE = 95;
+const BYTE_0 = 48;
+const BYTE_9 = 57;
+
+function isAlphabetByte(byte: number): boolean {
+	return (
+		(byte >= BYTE_LOWER_A && byte <= BYTE_LOWER_Z) ||
+		(byte >= BYTE_UPPER_A && byte <= BYTE_UPPER_Z) ||
+		byte === BYTE_UNDERSCORE
+	);
 }
-function isDigit(character: string): boolean {
-	return character >= "0" && character <= "9";
+
+function isNumericByte(byte: number): boolean {
+	return byte >= BYTE_0 && byte <= BYTE_9;
 }
-function isAlphaNumeric(character: string): boolean {
-	return isAlpha(character) || isDigit(character);
+
+function isAlphanumericByte(byte: number): boolean {
+	return isAlphabetByte(byte) || isNumericByte(byte);
 }
 
 /**
@@ -133,14 +147,15 @@ export default class ZapLexer {
 	}
 
 	private match(expected: string): boolean {
-		for (let index = 0; index < expected.length; index += 1)
-			if (this.position + index >= this.input.length || this.input[this.position + index] !== expected[index])
-				return false;
+		if (this.position + expected.length > this.input.length) return false;
 
-		// biome-ignore lint/style/useForOf: wrong!
-		for (let index = 0; index < expected.length; index += 1) this.advance();
+		if (this.input.slice(this.position, this.position + expected.length) === expected) {
+			// biome-ignore lint/style/useForOf: SHUT UP!
+			for (let index = 0; index < expected.length; index += 1) this.advance();
+			return true;
+		}
 
-		return true;
+		return false;
 	}
 
 	private nextToken(): Token | undefined {
@@ -153,11 +168,11 @@ export default class ZapLexer {
 		if (this.match("--")) return this.readComment(startLine, startColumn);
 		if (this.match("..")) return { column: startColumn, line: startLine, type: TokenType.DOT_DOT, value: ".." };
 
-		const character = this.peek();
-		if (!character) return undefined;
+		const byte = this.peekByte();
+		if (byte === 0) return undefined;
 
-		switch (character) {
-			case "\n": {
+		switch (byte) {
+			case 10: {
 				this.advance();
 				return {
 					column: startColumn,
@@ -167,7 +182,7 @@ export default class ZapLexer {
 				};
 			}
 
-			case "(": {
+			case 40: {
 				this.advance();
 				return {
 					column: startColumn,
@@ -177,7 +192,7 @@ export default class ZapLexer {
 				};
 			}
 
-			case ")": {
+			case 41: {
 				this.advance();
 				return {
 					column: startColumn,
@@ -187,7 +202,7 @@ export default class ZapLexer {
 				};
 			}
 
-			case ",": {
+			case 44: {
 				this.advance();
 				return {
 					column: startColumn,
@@ -197,7 +212,7 @@ export default class ZapLexer {
 				};
 			}
 
-			case ":": {
+			case 58: {
 				this.advance();
 				return {
 					column: startColumn,
@@ -207,7 +222,7 @@ export default class ZapLexer {
 				};
 			}
 
-			case "<": {
+			case 60: {
 				this.advance();
 				return {
 					column: startColumn,
@@ -217,7 +232,7 @@ export default class ZapLexer {
 				};
 			}
 
-			case "=": {
+			case 61: {
 				this.advance();
 				return {
 					column: startColumn,
@@ -227,7 +242,7 @@ export default class ZapLexer {
 				};
 			}
 
-			case ">": {
+			case 62: {
 				this.advance();
 				return {
 					column: startColumn,
@@ -237,7 +252,7 @@ export default class ZapLexer {
 				};
 			}
 
-			case "?": {
+			case 63: {
 				this.advance();
 				return {
 					column: startColumn,
@@ -247,7 +262,7 @@ export default class ZapLexer {
 				};
 			}
 
-			case "[": {
+			case 91: {
 				this.advance();
 				return {
 					column: startColumn,
@@ -257,7 +272,7 @@ export default class ZapLexer {
 				};
 			}
 
-			case "]": {
+			case 93: {
 				this.advance();
 				return {
 					column: startColumn,
@@ -267,7 +282,7 @@ export default class ZapLexer {
 				};
 			}
 
-			case "{": {
+			case 123: {
 				this.advance();
 				return {
 					column: startColumn,
@@ -277,7 +292,7 @@ export default class ZapLexer {
 				};
 			}
 
-			case "|": {
+			case 124: {
 				this.advance();
 				return {
 					column: startColumn,
@@ -287,7 +302,7 @@ export default class ZapLexer {
 				};
 			}
 
-			case "}": {
+			case 125: {
 				this.advance();
 				return {
 					column: startColumn,
@@ -298,16 +313,21 @@ export default class ZapLexer {
 			}
 		}
 
-		if (character === '"') return this.readStringLiteral(startLine, startColumn);
-		if (isDigit(character)) return this.readNumber(startLine, startColumn);
-		if (isAlpha(character)) return this.readIdentifier(startLine, startColumn);
+		if (byte === 34) return this.readStringLiteral(startLine, startColumn);
+		if (isNumericByte(byte)) return this.readNumber(startLine, startColumn);
+		if (isAlphabetByte(byte)) return this.readIdentifier(startLine, startColumn);
 
-		throw new Error(`Unexpected character '${character}' at line ${this.line}, column ${this.column}`);
+		throw new Error(`Unexpected character '${this.peek()}' at line ${this.line}, column ${this.column}`);
 	}
 
-	private peek(): string | undefined {
+	private peek(): string {
 		if (this.position >= this.input.length) return "\0";
-		return this.input[this.position];
+		return this.input[this.position]!;
+	}
+
+	private peekByte(): number {
+		if (this.position >= this.input.length) return 0;
+		return this.input.charCodeAt(this.position);
 	}
 
 	private readComment(startLine: number, startColumn: number): Token {
@@ -329,7 +349,7 @@ export default class ZapLexer {
 	private readIdentifier(startLine: number, startColumn: number): Token {
 		let value = "";
 
-		while (this.position < this.input.length && (isAlphaNumeric(this.peek()!) || this.peek() === "_")) {
+		while (this.position < this.input.length && isAlphanumericByte(this.peekByte())) {
 			value += this.peek();
 			this.advance();
 		}
@@ -338,7 +358,7 @@ export default class ZapLexer {
 			value += this.peek();
 			this.advance();
 
-			while (this.position < this.input.length && (isAlphaNumeric(this.peek()!) || this.peek() === "_")) {
+			while (this.position < this.input.length && isAlphanumericByte(this.peekByte())) {
 				value += this.peek();
 				this.advance();
 			}
@@ -366,16 +386,16 @@ export default class ZapLexer {
 		let hasDecimalPoint = false;
 
 		while (this.position < this.input.length) {
-			const currentCharacter = this.peek()!;
+			const byte = this.peekByte();
 
-			if (isDigit(currentCharacter)) {
-				value += currentCharacter;
+			if (isNumericByte(byte)) {
+				value += this.peek();
 				this.advance();
-			} else if (currentCharacter === "." && !hasDecimalPoint) {
+			} else if (byte === 46 && !hasDecimalPoint) {
 				if (this.position + 1 < this.input.length && this.input[this.position + 1] === ".") break;
 
 				hasDecimalPoint = true;
-				value += currentCharacter;
+				value += this.peek();
 				this.advance();
 			} else break;
 		}
@@ -452,8 +472,8 @@ export default class ZapLexer {
 
 	private skipWhitespace(): void {
 		while (this.position < this.input.length) {
-			const character = this.peek();
-			if (character === " " || character === "\t" || character === "\r") this.advance();
+			const byte = this.peekByte();
+			if (byte === 32 || byte === 9 || byte === 13) this.advance();
 			else break;
 		}
 	}
