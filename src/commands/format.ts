@@ -21,11 +21,22 @@ const format = defineCommand({
 			return;
 		}
 
-		const formattedContent = await formatFileAsync(file);
-		if (overwrite) {
-			await file.write(formattedContent);
-			consoleLog(`Formatted content written to ${chalk.green(zapFile)}`);
-		} else await Bun.stdout.write(formattedContent);
+		try {
+			const formattedContent = await formatFileAsync(file);
+			if (overwrite) {
+				await file.write(formattedContent);
+				consoleLog(`Formatted content written to ${chalk.green(zapFile)}`);
+			} else await Bun.stdout.write(formattedContent);
+		} catch (error) {
+			if (error instanceof Error) {
+				logger.error(`Failed to format ${zapFile}: ${error.message}`);
+				if (error.message.includes("line")) {
+					logger.error("Please check the syntax of your Zap configuration file.");
+				}
+			} else {
+				logger.error(`Failed to format ${zapFile}: ${String(error)}`);
+			}
+		}
 	},
 	options: {
 		overwrite: option(z._default(z.boolean(), false), {

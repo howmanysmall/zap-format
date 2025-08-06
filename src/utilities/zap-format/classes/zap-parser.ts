@@ -1,6 +1,7 @@
 /* eslint-disable sonar/no-duplicate-string -- useless */
 
 import TokenType from "../meta/token-type";
+import TokenTypeMeta from "../meta/token-type-meta";
 import type {
 	ArrayTypeNode,
 	CommentNode,
@@ -128,7 +129,9 @@ export default class ZapParser {
 				}
 
 				default: {
-					throw new Error(`Unexpected token ${this.peek().type} at line ${this.peek().line}`);
+					throw new Error(
+						`Unexpected token '${this.getTokenTypeName(this.peek().type)}' at line ${this.peek().line}`,
+					);
 				}
 			}
 
@@ -161,7 +164,7 @@ export default class ZapParser {
 
 	private consume(type: TokenType, message: string): Token {
 		if (this.check(type)) return this.advance();
-		throw new Error(`${message}. Got ${this.peek().type} at line ${this.peek().line}`);
+		throw new Error(`${message}. Got '${this.getTokenTypeName(this.peek().type)}' at line ${this.peek().line}`);
 	}
 
 	private consumeIdentifierValue(): string {
@@ -169,19 +172,24 @@ export default class ZapParser {
 		if (token.type === TokenType.IDENTIFIER) return this.advance().value;
 		if (IDENTIFIER_SET.has(token.type)) return this.advance().value;
 
-		throw new Error(`Expected identifier value, got ${token.type} at line ${token.line}`);
+		throw new Error(`Expected identifier value, got '${this.getTokenTypeName(token.type)}' at line ${token.line}`);
 	}
 
 	private consumeParameterName(): string {
 		const token = this.peek();
 		if (this.isValidParameterName()) return this.advance().value;
-		throw new Error(`Expected parameter name, got ${token.type} at line ${token.line}`);
+		throw new Error(`Expected parameter name, got '${this.getTokenTypeName(token.type)}' at line ${token.line}`);
 	}
 
 	private consumePropertyName(): string {
 		const token = this.peek();
 		if (PROPERTY_TYPES.has(token.type)) return this.advance().value;
-		throw new Error(`Expected property name, got ${token.type} at line ${token.line}`);
+		throw new Error(`Expected property name, got '${this.getTokenTypeName(token.type)}' at line ${token.line}`);
+	}
+
+	private getTokenTypeName(tokenType: TokenType): string {
+		const { name } = TokenTypeMeta[tokenType];
+		return name ?? `unknown token type (${tokenType})`;
 	}
 
 	private isAtEnd(): boolean {
@@ -229,8 +237,12 @@ export default class ZapParser {
 
 					this.skipNewlines();
 
-					if (this.check(TokenType.COMMA)) this.advance();
-					else break;
+					if (!this.check(TokenType.COMMA)) break;
+
+					this.advance();
+					this.skipNewlines();
+					// Handle trailing comma - if we see closing paren after comma, break
+					if (this.check(TokenType.RIGHT_PAREN)) break;
 				} while (!this.check(TokenType.RIGHT_PAREN));
 
 			this.consume(TokenType.RIGHT_PAREN, 'Expected ")"');
@@ -266,7 +278,9 @@ export default class ZapParser {
 
 		if (this.isPrimitiveType()) return this.parsePrimitiveType();
 
-		throw new Error(`Unexpected token in type: ${this.peek().type} at line ${this.peek().line}`);
+		throw new Error(
+			`Unexpected token in type: '${this.getTokenTypeName(this.peek().type)}' at line ${this.peek().line}`,
+		);
 	}
 
 	private parseComment(): CommentNode {
@@ -302,7 +316,12 @@ export default class ZapParser {
 			if (tagField && this.check(TokenType.LEFT_BRACE)) fields = this.parseStructFields();
 			variants[variantsSize++] = { name: variantName, fields };
 
-			if (this.check(TokenType.COMMA)) this.advance();
+			if (this.check(TokenType.COMMA)) {
+				this.advance();
+				this.skipNewlines();
+				// Handle trailing comma
+				if (this.check(TokenType.RIGHT_BRACE)) break;
+			}
 			this.skipNewlines();
 		}
 
@@ -320,6 +339,7 @@ export default class ZapParser {
 		this.consume(TokenType.EVENT, 'Expected "event"');
 		const name = this.consume(TokenType.IDENTIFIER, "Expected event name").value;
 		this.consume(TokenType.EQUALS, 'Expected "="');
+		this.skipNewlines(); // Skip newlines after equals
 		this.consume(TokenType.LEFT_BRACE, 'Expected "{"');
 
 		const properties: Writable<EventProperties> = {};
@@ -374,6 +394,7 @@ export default class ZapParser {
 		this.consume(TokenType.FUNCT, 'Expected "funct"');
 		const name = this.consume(TokenType.IDENTIFIER, "Expected function name").value;
 		this.consume(TokenType.EQUALS, 'Expected "="');
+		this.skipNewlines(); // Skip newlines after equals
 		this.consume(TokenType.LEFT_BRACE, 'Expected "{"');
 
 		const properties: Writable<FunctionProperties> = {};
@@ -461,6 +482,7 @@ export default class ZapParser {
 		this.consume(TokenType.NAMESPACE, 'Expected "namespace"');
 		const name = this.consume(TokenType.IDENTIFIER, "Expected namespace name").value;
 		this.consume(TokenType.EQUALS, 'Expected "="');
+		this.skipNewlines(); // Skip newlines after equals
 		this.consume(TokenType.LEFT_BRACE, 'Expected "{"');
 
 		const members = new Array<CommentNode | EventNode | FunctionNode>();
@@ -473,7 +495,7 @@ export default class ZapParser {
 			if (this.check(TokenType.COMMENT)) members[membersSize++] = this.parseComment();
 			else if (this.check(TokenType.EVENT)) members[membersSize++] = this.parseEvent();
 			else if (this.check(TokenType.FUNCT)) members[membersSize++] = this.parseFunction();
-			else throw new Error(`Unexpected token in namespace: ${this.peek().type}`);
+			else throw new Error(`Unexpected token in namespace: '${this.getTokenTypeName(this.peek().type)}'`);
 
 			this.skipNewlines();
 		}
@@ -629,7 +651,12 @@ export default class ZapParser {
 
 			fields[fieldsSize++] = { name: fieldName, type: fieldType };
 
-			if (this.check(TokenType.COMMA)) this.advance();
+			if (this.check(TokenType.COMMA)) {
+				this.advance();
+				this.skipNewlines();
+				// Handle trailing comma
+				if (this.check(TokenType.RIGHT_BRACE)) break;
+			}
 			this.skipNewlines();
 		}
 
@@ -699,8 +726,10 @@ export default class ZapParser {
 			if (!this.check(TokenType.RIGHT_PAREN))
 				do {
 					components[componentsSize++] = this.parseType();
-					if (this.check(TokenType.COMMA)) this.advance();
-					else break;
+					if (!this.check(TokenType.COMMA)) break;
+					this.advance();
+					// Handle trailing comma
+					if (this.check(TokenType.RIGHT_PAREN)) break;
 				} while (!this.check(TokenType.RIGHT_PAREN));
 
 			this.consume(TokenType.RIGHT_PAREN, 'Expected ")"');
