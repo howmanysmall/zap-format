@@ -96,13 +96,41 @@ export default class ZapParser {
 
 			const tokenType = this.peek().type;
 
-			if (tokenType === TokenType.COMMENT) items[itemsSize++] = this.parseComment();
-			else if (tokenType === TokenType.OPT) options[optionsSize++] = this.parseOption();
-			else if (tokenType === TokenType.TYPE) items[itemsSize++] = this.parseTypeDefinition();
-			else if (tokenType === TokenType.EVENT) items[itemsSize++] = this.parseEvent();
-			else if (tokenType === TokenType.FUNCT) items[itemsSize++] = this.parseFunction();
-			else if (tokenType === TokenType.NAMESPACE) items[itemsSize++] = this.parseNamespace();
-			else throw new Error(`Unexpected token ${this.peek().type} at line ${this.peek().line}`);
+			switch (tokenType) {
+				case TokenType.COMMENT: {
+					items[itemsSize++] = this.parseComment();
+					break;
+				}
+
+				case TokenType.EVENT: {
+					items[itemsSize++] = this.parseEvent();
+					break;
+				}
+
+				case TokenType.FUNCT: {
+					items[itemsSize++] = this.parseFunction();
+					break;
+				}
+
+				case TokenType.NAMESPACE: {
+					items[itemsSize++] = this.parseNamespace();
+					break;
+				}
+
+				case TokenType.OPT: {
+					options[optionsSize++] = this.parseOption();
+					break;
+				}
+
+				case TokenType.TYPE: {
+					items[itemsSize++] = this.parseTypeDefinition();
+					break;
+				}
+
+				default: {
+					throw new Error(`Unexpected token ${this.peek().type} at line ${this.peek().line}`);
+				}
+			}
 
 			this.skipNewlines();
 		}
