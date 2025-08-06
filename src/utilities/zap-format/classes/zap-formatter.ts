@@ -304,7 +304,7 @@ export default class ZapFormatter {
 		const elementIndent = this.getIndent();
 
 		for (let index = 0; index < elements.length; index += 1) {
-			const element = elements[index]; 
+			const element = elements[index];
 			if (element === undefined) continue;
 
 			const isLast = index === elements.length - 1;

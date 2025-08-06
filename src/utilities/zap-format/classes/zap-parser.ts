@@ -3,30 +3,30 @@
 import TokenType from "../meta/token-type";
 import TokenTypeMeta from "../meta/token-type-meta";
 import type {
-    ArrayTypeNode,
-    CommentNode,
-    EnumTypeNode,
-    EventNode,
-    EventProperties,
-    FunctionNode,
-    FunctionProperties,
-    InstanceTypeNode,
-    MapTypeNode,
-    NamespaceNode,
-    OptionalTypeNode,
-    OptionNode,
-    PrimitiveTypeNode,
-    RangeConstraint,
-    SetTypeNode,
-    StructTypeNode,
-    Token,
-    TupleTypeNode,
-    TypeDefinitionNode,
-    TypeNode,
-    UnionTypeNode,
-    VectorTypeNode,
-    Writable,
-    ZapConfigurationNode,
+	ArrayTypeNode,
+	CommentNode,
+	EnumTypeNode,
+	EventNode,
+	EventProperties,
+	FunctionNode,
+	FunctionProperties,
+	InstanceTypeNode,
+	MapTypeNode,
+	NamespaceNode,
+	OptionalTypeNode,
+	OptionNode,
+	PrimitiveTypeNode,
+	RangeConstraint,
+	SetTypeNode,
+	StructTypeNode,
+	Token,
+	TupleTypeNode,
+	TypeDefinitionNode,
+	TypeNode,
+	UnionTypeNode,
+	VectorTypeNode,
+	Writable,
+	ZapConfigurationNode,
 } from "../types";
 
 const STANDARD_TYPES = new Set([
@@ -274,7 +274,7 @@ export default class ZapParser {
 					type: "type",
 				} as InstanceTypeNode;
 			}
-			
+
 			// Handle custom type references (like enum types defined in the same file)
 			this.advance();
 			return {
