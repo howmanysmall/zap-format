@@ -3,30 +3,30 @@
 import TokenType from "../meta/token-type";
 import TokenTypeMeta from "../meta/token-type-meta";
 import type {
-	ArrayTypeNode,
-	CommentNode,
-	EnumTypeNode,
-	EventNode,
-	EventProperties,
-	FunctionNode,
-	FunctionProperties,
-	InstanceTypeNode,
-	MapTypeNode,
-	NamespaceNode,
-	OptionalTypeNode,
-	OptionNode,
-	PrimitiveTypeNode,
-	RangeConstraint,
-	SetTypeNode,
-	StructTypeNode,
-	Token,
-	TupleTypeNode,
-	TypeDefinitionNode,
-	TypeNode,
-	UnionTypeNode,
-	VectorTypeNode,
-	Writable,
-	ZapConfigurationNode,
+    ArrayTypeNode,
+    CommentNode,
+    EnumTypeNode,
+    EventNode,
+    EventProperties,
+    FunctionNode,
+    FunctionProperties,
+    InstanceTypeNode,
+    MapTypeNode,
+    NamespaceNode,
+    OptionalTypeNode,
+    OptionNode,
+    PrimitiveTypeNode,
+    RangeConstraint,
+    SetTypeNode,
+    StructTypeNode,
+    Token,
+    TupleTypeNode,
+    TypeDefinitionNode,
+    TypeNode,
+    UnionTypeNode,
+    VectorTypeNode,
+    Writable,
+    ZapConfigurationNode,
 } from "../types";
 
 const STANDARD_TYPES = new Set([
@@ -274,6 +274,14 @@ export default class ZapParser {
 					type: "type",
 				} as InstanceTypeNode;
 			}
+			
+			// Handle custom type references (like enum types defined in the same file)
+			this.advance();
+			return {
+				name: token.value,
+				subtype: "primitive",
+				type: "type",
+			} as PrimitiveTypeNode;
 		}
 
 		if (this.isPrimitiveType()) return this.parsePrimitiveType();
@@ -485,7 +493,7 @@ export default class ZapParser {
 		this.skipNewlines(); // Skip newlines after equals
 		this.consume(TokenType.LEFT_BRACE, 'Expected "{"');
 
-		const members = new Array<CommentNode | EventNode | FunctionNode>();
+		const members = new Array<CommentNode | EventNode | FunctionNode | TypeDefinitionNode>();
 		let membersSize = 0;
 
 		while (!this.check(TokenType.RIGHT_BRACE) && !this.isAtEnd()) {
@@ -495,6 +503,7 @@ export default class ZapParser {
 			if (this.check(TokenType.COMMENT)) members[membersSize++] = this.parseComment();
 			else if (this.check(TokenType.EVENT)) members[membersSize++] = this.parseEvent();
 			else if (this.check(TokenType.FUNCT)) members[membersSize++] = this.parseFunction();
+			else if (this.check(TokenType.TYPE)) members[membersSize++] = this.parseTypeDefinition();
 			else throw new Error(`Unexpected token in namespace: '${this.getTokenTypeName(this.peek().type)}'`);
 
 			this.skipNewlines();

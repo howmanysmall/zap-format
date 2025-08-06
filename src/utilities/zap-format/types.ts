@@ -43,7 +43,7 @@ export interface FunctionNode extends AstNode {
 
 /** Represents a namespace node in the Zap AST. */
 export interface NamespaceNode extends AstNode {
-	readonly members: ReadonlyArray<CommentNode | EventNode | FunctionNode>;
+	readonly members: ReadonlyArray<CommentNode | EventNode | FunctionNode | TypeDefinitionNode>;
 	readonly name: string;
 	readonly type: "namespace";
 }

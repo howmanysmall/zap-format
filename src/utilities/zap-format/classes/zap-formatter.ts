@@ -293,7 +293,28 @@ export default class ZapFormatter {
 			return this.formatType(element.type);
 		});
 
-		return `(${elements.join(", ")})`;
+		const inlineFormat = `(${elements.join(", ")})`;
+		if (inlineFormat.length <= WIDTH_THRESHOLD) return inlineFormat;
+
+		// Multi-line format when too long
+		const lines = ["("];
+		let length = 1;
+
+		this.indentLevel += 1;
+		const elementIndent = this.getIndent();
+
+		for (let index = 0; index < elements.length; index += 1) {
+			const element = elements[index]; 
+			if (element === undefined) continue;
+
+			const isLast = index === elements.length - 1;
+			lines[length++] = `${elementIndent}${element}${isLast ? "" : ","}`;
+		}
+
+		this.indentLevel -= 1;
+		lines[length++] = `${this.getIndent()})`;
+
+		return lines.join("\n");
 	}
 
 	private formatType(typeNode: TypeNode): string {
@@ -349,7 +370,7 @@ export default class ZapFormatter {
 	}
 
 	private formatTypeDefinition(typeDefinitionNode: TypeDefinitionNode): string {
-		return `type ${typeDefinitionNode.name} = ${this.formatType(typeDefinitionNode.definition)}`;
+		return `${this.getIndent()}type ${typeDefinitionNode.name} = ${this.formatType(typeDefinitionNode.definition)}`;
 	}
 
 	private formatUnionType(unionTypeNode: UnionTypeNode): string {

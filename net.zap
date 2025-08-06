@@ -27,3 +27,15 @@ event PromptNotification =
 	message: string.utf8?,
 	),
 }
+
+
+namespace BuddyMan = {
+type Cool = enum {
+	Hello,
+	World,
+}
+ event CoolEvent = {
+	from: Server, type: Reliable, call: SingleAsync,
+	data: (coolType: Cool),
+ }
+}
