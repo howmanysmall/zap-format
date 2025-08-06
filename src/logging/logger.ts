@@ -25,7 +25,7 @@ const enhancedFormat = format.combine(
  * namespaces, correlation IDs, and memory tracking.
  */
 const logger = createLogger({
-	defaultMeta: { service: "PASCAL_smart-bun-cli-template" },
+	defaultMeta: { service: "ZapFormat" },
 	format: enhancedFormat,
 	level: "info",
 	transports: [

@@ -14,7 +14,7 @@ import { Octokit } from "@octokit/rest";
 import scriptConsole from "./utilities/script-console";
 
 const REPO_OWNER = "howmanysmall";
-const REPO_NAME = "smart-bun-cli-template";
+const REPO_NAME = "zap-format";
 
 /** Environment variable configuration for LLM providers. */
 interface ProviderConfiguration {
@@ -257,11 +257,11 @@ function generateChangelogPrompt(
 	const sections = [
 		"# Changelog Generation Request",
 		"",
-		"Please generate a comprehensive changelog for the next release of **smart-bun-cli-template**, a Luau LSP wrapper tool.",
+		"Please generate a comprehensive changelog for the next release of **zap-format**, a Luau LSP wrapper tool.",
 		"",
 		"## Project Context",
 		"",
-		'**smart-bun-cli-template** is a TypeScript/Bun-based CLI tool that serves as a "visual" Luau LSP wrapper, designed to improve linting capabilities for Luau code. The project uses modern JavaScript runtime (Bun) and follows strict TypeScript coding standards.',
+		'**zap-format** is a TypeScript/Bun-based CLI tool that serves as a "visual" Luau LSP wrapper, designed to improve linting capabilities for Luau code. The project uses modern JavaScript runtime (Bun) and follows strict TypeScript coding standards.',
 		"",
 		`## Previous Release: ${releaseInfo.name} (${releaseInfo.tagName})`,
 		`**Published:** ${new Date(releaseInfo.publishedAt).toLocaleDateString()}`,

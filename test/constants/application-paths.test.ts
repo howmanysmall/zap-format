@@ -27,9 +27,9 @@ describe("application-paths", () => {
 		}
 	});
 
-	it("should contain smart-bun-cli-template in path names", () => {
+	it("should contain zap-format in path names", () => {
 		const paths = [applicationPaths.data, applicationPaths.config, applicationPaths.cache];
-		for (const path of paths) expect(path.toLowerCase()).toContain("smart-bun-cli-template");
+		for (const path of paths) expect(path.toLowerCase()).toContain("zap-format");
 	});
 
 	describe("platform-specific behavior", () => {

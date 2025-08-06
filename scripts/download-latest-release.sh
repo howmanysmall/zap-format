@@ -65,8 +65,8 @@ case "$ASSET_TYPE" in
 	echo "Detected platform: $PLATFORM"
 
 	# Download the release asset for the current platform
-	echo "Downloading smart-bun-cli-template-$PLATFORM.tar.gz..."
-	gh release download --repo howmanysmall/smart-bun-cli-template --pattern "smart-bun-cli-template-$PLATFORM.tar.gz"
+	echo "Downloading zap-format-$PLATFORM.tar.gz..."
+	gh release download --repo howmanysmall/zap-format --pattern "zap-format-$PLATFORM.tar.gz"
 
 	if [ $? -ne 0 ]; then
 		echo "Failed to download release asset"
@@ -74,14 +74,14 @@ case "$ASSET_TYPE" in
 	fi
 
 	# Extract the downloaded file
-	echo "Extracting smart-bun-cli-template-$PLATFORM.tar.gz to current-release/..."
+	echo "Extracting zap-format-$PLATFORM.tar.gz to current-release/..."
 	mkdir -p current-release
-	tar -xzf "smart-bun-cli-template-$PLATFORM.tar.gz" -C current-release/
+	tar -xzf "zap-format-$PLATFORM.tar.gz" -C current-release/
 
 	if [ $? -eq 0 ]; then
 		echo "Successfully extracted release to current-release/"
 		echo "Cleaning up downloaded archive..."
-		rm "smart-bun-cli-template-$PLATFORM.tar.gz"
+		rm "zap-format-$PLATFORM.tar.gz"
 	else
 		echo "Failed to extract release"
 		exit 1
@@ -89,7 +89,7 @@ case "$ASSET_TYPE" in
 	;;
 "source")
 	echo "Downloading source code..."
-	gh release download --repo howmanysmall/smart-bun-cli-template --archive=tar.gz
+	gh release download --repo howmanysmall/zap-format --archive=tar.gz
 
 	if [ $? -ne 0 ]; then
 		echo "Failed to download source code"
@@ -99,12 +99,12 @@ case "$ASSET_TYPE" in
 	# Extract source code
 	echo "Extracting source code to current-release/..."
 	mkdir -p current-release
-	tar -xzf smart-bun-cli-template-*.tar.gz -C current-release/ --strip-components=1
+	tar -xzf zap-format-*.tar.gz -C current-release/ --strip-components=1
 
 	if [ $? -eq 0 ]; then
 		echo "Successfully extracted source code to current-release/"
 		echo "Cleaning up downloaded archive..."
-		rm smart-bun-cli-template-*.tar.gz
+		rm zap-format-*.tar.gz
 	else
 		echo "Failed to extract source code"
 		exit 1

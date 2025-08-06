@@ -4,10 +4,10 @@
 		"outDir": "./dist"
 	},
 	"bin": {
-		"smart-bun-cli-template": "./dist/index.js"
+		"zap-format": "./dist/index.js"
 	},
 	"description": "A brand new Bun CLI!",
-	"name": "@roblox-tooling/smart-bun-cli-template",
+	"name": "@roblox-tooling/zap-format",
 	"module": "src/index.ts",
 	"type": "module",
 	"engines": {
@@ -44,7 +44,7 @@
 		"zod-validation-error": "^4.0.0-beta.2"
 	},
 	"scripts": {
-		"build:executable": "bun build ./dist --compile --production --target=bun --outfile=smart-bun-cli-template --minify --sourcemap",
+		"build:executable": "bun build ./dist --compile --production --target=bun --outfile=zap-format --minify --sourcemap",
 		"build": "bunli build",
 		"create-release": "bun run ./scripts/create-release.ts",
 		"dev": "bun --hot run src/index.ts",
@@ -62,13 +62,13 @@
 	"author": {
 		"name": "HowManySmall"
 	},
-	"homepage": "https://github.com/howmanysmall/smart-bun-cli-template#readme",
+	"homepage": "https://github.com/howmanysmall/zap-format#readme",
 	"bugs": {
-		"url": "https://github.com/howmanysmall/smart-bun-cli-template/issues"
+		"url": "https://github.com/howmanysmall/zap-format/issues"
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/howmanysmall/smart-bun-cli-template.git"
+		"url": "https://github.com/howmanysmall/zap-format.git"
 	},
 	"license": "MIT",
 	"main": "src/index.ts"

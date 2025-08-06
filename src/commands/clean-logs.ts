@@ -24,7 +24,7 @@ async function deleteFileAsync(filePath: string, rimraf: boolean): Promise<void>
 
 const cleanLogs = defineCommand({
 	name: CLEAN_LOGS,
-	description: "Cleans up the smart-bun-cli-template logs.",
+	description: "Cleans up the zap-format logs.",
 	handler: async ({ colors, flags }) => {
 		const children = await getChildrenAsync(applicationPaths.log);
 

@@ -619,8 +619,8 @@ function createOpenRouterProvider(): LlmProvider | undefined {
 					headers: {
 						Authorization: `Bearer ${apiKey}`,
 						"Content-Type": APPLICATION_JSON,
-						"HTTP-Referer": "https://github.com/howmanysmall/smart-bun-cli-template",
-						"X-Title": "smart-bun-cli-template Changelog Generator",
+						"HTTP-Referer": "https://github.com/howmanysmall/zap-format",
+						"X-Title": "zap-format Changelog Generator",
 					},
 					method: "POST",
 				});

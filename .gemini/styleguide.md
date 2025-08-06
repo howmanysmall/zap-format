@@ -1,8 +1,8 @@
-# PASCAL_smart-bun-cli-template TypeScript Style Guide
+# ZapFormat TypeScript Style Guide
 
 # Introduction
 
-This style guide establishes the coding conventions for TypeScript code developed in the smart-bun-cli-template project. It builds upon modern TypeScript and Bun best practices while incorporating specific organizational requirements and preferences. The guide prioritizes code readability, maintainability, consistency, and performance across all project components.
+This style guide establishes the coding conventions for TypeScript code developed in the zap-format project. It builds upon modern TypeScript and Bun best practices while incorporating specific organizational requirements and preferences. The guide prioritizes code readability, maintainability, consistency, and performance across all project components.
 
 # Key Principles
 
