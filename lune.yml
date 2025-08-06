@@ -1,0 +1,29 @@
+base: roblox
+name: lune
+globals:
+  # override Roblox require style with string requires
+  require:
+    args:
+      - type: string
+  Color3.fromRGB:
+    args:
+      - required: false
+        type: number
+      - required: false
+        type: number
+      - required: false
+        type: number
+    must_use: true
+  vector.create:
+    args:
+      - type: number
+      - type: number
+      - required: false
+        type: number
+    must_use: true
+  math.lerp:
+    args:
+      - type: number
+      - type: number
+      - type: number
+    must_use: true

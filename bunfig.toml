@@ -1,0 +1,18 @@
+[install]
+auto = "auto"
+
+[test]
+coverage = false
+coverageSkipTestFiles = true
+coverageThreshold = 0.9
+root = "./test"
+
+[run]
+bun = true
+
+[build]
+minify = true
+outdir = "./dist"
+splitting = true
+target = "bun"
+treeShaking = true

@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions: read-all
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality-linux:
+    name: Lint & type-check (Linux only)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Restore Bun global cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock*', 'package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install dependencies (frozen lockfile)
+        run: bun ci
+
+      # Run each linter once, here on Linux
+      - name: Biome
+        run: bun run lint:biome
+
+      - name: ESLint
+        run: bun run lint:eslint
+
+      - name: TypeScript (tsc)
+        run: bun run lint:tsc
+
+      # Optional quick build sanity check (Linux only)
+      - name: Build check
+        run: |
+          bun run build
+          bun run build:executable
+          test -f dist/index.js
+
+  tests:
+    name: Tests (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Restore Bun global cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock*', 'package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      # Cache node_modules on Windows to mitigate slow installs
+      - name: Cache node_modules (Windows only)
+        if: runner.os == 'Windows'
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.bun/install/cache
+          key: ${{ runner.os }}-full-${{ hashFiles('**/bun.lock*', 'package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-full-
+
+      - name: Install dependencies (frozen lockfile)
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            # Skip install if node_modules cache hit
+            if [ -d "node_modules" ] && [ -f "node_modules/.cache-marker" ]; then
+              echo "Using cached node_modules"
+            else
+              bun install --frozen-lockfile --ignore-scripts --backend=copyfile
+              touch node_modules/.cache-marker
+            fi
+          else
+            bun ci
+          fi
+        shell: bash
+
+      - name: Run tests
+        run: bun test

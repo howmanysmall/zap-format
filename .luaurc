@@ -1,0 +1,20 @@
+{
+	"aliases": {
+		"classes": "lune/Classes",
+		"contexts": "lune/Contexts",
+		"errors": "lune/Classes/Errors",
+		"functions": "lune/Functions",
+		"lune": "~/.lune/.typedefs/0.10.1/",
+		"packages": "lune/Packages",
+		"promises": "lune/Promises",
+		"types": "lune/Types",
+		"utilities": "lune/Utilities"
+	},
+	"globals": ["fs"],
+	"languageMode": "strict",
+	"lint": {
+		"*": true
+	},
+	"lintErrors": true,
+	"typeErrors": true
+}
